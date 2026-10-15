@@ -1,0 +1,49 @@
+#!/bin/bash
+# Pick Speakers (calibrated if present) or Headphones by real Pulse names.
+# Writes the user-switch timestamp so sticky-sink does not snap back.
+set -uo pipefail
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy"
+mkdir -p "$STATE_DIR"
+STICKY="$STATE_DIR/audio-sticky-sink"
+USER_TS="$STATE_DIR/audio-user-switch.ts"
+VIRT="omarchy_speaker_tuning"
+
+which="${1:-}"
+sink_arg="${2:-}"
+date +%s >"$USER_TS"
+echo "$(date -Iseconds) pick $which ${sink_arg:-} dest pending" >>"$STATE_DIR/audio-pick.log"
+
+sinks=$(timeout 2 pactl -f json list sinks) || exit 1
+name_for() {
+  jq -r --arg pat "$1" '.[] | select(.name | test($pat)) | .name' <<<"$sinks" | head -1
+}
+id_for() {
+  jq -r --arg n "$1" '.[] | select(.name == $n) | .properties["object.id"] // .index' <<<"$sinks" | head -1
+}
+
+headphones=$(name_for "Headphone_Jack_Adapter")
+speakers_hw=$(name_for "HiFi__Speaker__sink$")
+virt=$(name_for "^omarchy_speaker_tuning$")
+
+case "$which" in
+  headphones)
+    dest=$headphones
+    ;;
+  speakers)
+    dest=${virt:-$speakers_hw}
+    ;;
+  sink)
+    dest=$(jq -r --arg n "$sink_arg" '.[] | select(.name == $n) | .name' <<<"$sinks" | head -1)
+    ;;
+  *)
+    echo "Usage: omarchy-audio-output-pick speakers|headphones|sink <name>" >&2
+    exit 2
+    ;;
+esac
+
+[[ -n $dest ]] || { echo "$(date -Iseconds) pick $which EMPTY" >>"$STATE_DIR/audio-pick.log"; exit 1; }
+echo "$(date -Iseconds) pick $which -> $dest" >>"$STATE_DIR/audio-pick.log"
+printf '%s\n' "$dest" >"$STICKY"
+id=$(id_for "$dest")
+omarchy-audio-output-set-default "${id:-0}" "$dest"

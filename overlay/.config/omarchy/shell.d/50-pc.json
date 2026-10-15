@@ -1,0 +1,16 @@
+{
+  "barInsert": [
+    {
+      "after": "timon.local-ai",
+      "entry": {
+        "id": "timon.pointer"
+      }
+    },
+    {
+      "after": "timon.pointer",
+      "entry": {
+        "id": "timon.audio-passthrough"
+      }
+    }
+  ]
+}

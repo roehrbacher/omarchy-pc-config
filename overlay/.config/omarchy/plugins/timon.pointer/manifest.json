@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "timon.pointer",
+  "name": "Pointer speed",
+  "version": "1.1.0",
+  "author": "timon",
+  "description": "Separate flat pointer speed for the ProtoArc and the G305",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Pointer speed",
+    "description": "Switch the saved sensitivity of each mouse",
+    "category": "System",
+    "allowMultiple": false
+  }
+}

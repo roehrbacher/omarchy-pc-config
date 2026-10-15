@@ -1,0 +1,69 @@
+#!/bin/bash
+# Speakers (always through omarchy_speaker_tuning when it exists) <-> Headphones.
+# Hides the extra "null" calibrator sink from Ctrl+^.
+
+set -uo pipefail
+
+virt="omarchy_speaker_tuning"
+speakers=""
+headphones=""
+virt_json=""
+speakers_json=""
+headphones_json=""
+
+sinks=$(timeout 2 pactl -f json list sinks) || exit 1
+
+while IFS= read -r row; do
+  name=$(jq -r '.name' <<<"$row")
+  case "$name" in
+    omarchy_speaker_tuning)
+      virt_json=$row
+      ;;
+    *HiFi__Speaker__sink)
+      speakers=$name
+      speakers_json=$row
+      ;;
+    *Headphone_Jack_Adapter*)
+      headphones=$name
+      headphones_json=$row
+      ;;
+  esac
+done < <(jq -c '.[]' <<<"$sinks")
+
+if [[ -n $virt_json ]]; then
+  speaker_json=$virt_json
+  speaker_name=$virt
+else
+  speaker_json=$speakers_json
+  speaker_name=$speakers
+fi
+
+if [[ -z $speaker_json || -z $headphones_json ]]; then
+  exec omarchy-audio-output-switch
+fi
+
+current=$(timeout 2 pactl get-default-sink)
+if [[ $current == "$virt" || $current == "$speakers" ]]; then
+  "$HOME"/.local/bin/omarchy-audio-output-pick headphones
+  label="Headphones"
+else
+  "$HOME"/.local/bin/omarchy-audio-output-pick speakers
+  label="Speakers"
+fi
+
+next_name=$(timeout 2 pactl get-default-sink)
+
+next_effective=$(omarchy-audio-output-sink "$next_name")
+next_sink_volume=$(timeout 2 pactl get-sink-volume "$next_effective" 2>/dev/null |
+  awk 'NR == 1 {for (i = 1; i <= NF; i++) if ($i ~ /%$/) {sub("%", "", $i); print $i; exit}}')
+[[ -n $next_sink_volume ]] || next_sink_volume=50
+if [[ $(timeout 2 pactl get-sink-mute "$next_effective" 2>/dev/null) == *yes ]] || (( next_sink_volume == 0 )); then
+  icon_state="muted"
+elif (( next_sink_volume <= 33 )); then
+  icon_state="low"
+elif (( next_sink_volume <= 66 )); then
+  icon_state="medium"
+else
+  icon_state="high"
+fi
+omarchy-osd -i "volume-${icon_state}" -m "$label"

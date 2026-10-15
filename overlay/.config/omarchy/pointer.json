@@ -1,0 +1,16 @@
+{
+  "profiles": [
+    {
+      "id": "protoarc",
+      "label": "ProtoArc",
+      "match": "compx-2.4g-receiver-mouse",
+      "sensitivity": -0.4
+    },
+    {
+      "id": "g305",
+      "label": "G305",
+      "match": "logitech-g305-1",
+      "sensitivity": -0.45
+    }
+  ]
+}

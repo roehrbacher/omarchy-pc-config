@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+"""Per-mouse pointer speed for Hyprland.
+
+status          print JSON: saved profiles and which mice are connected
+set <id> <n>    save a profile and apply it if that mouse is connected
+apply           apply every saved profile whose mouse is connected
+"""
+
+import fnmatch
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+CONFIG = Path.home() / ".config/omarchy/pointer.json"
+# The mouse blocks live in the shared input file (omarchy-shared-config).
+INPUT = Path.home() / ".config/hypr/shared-input.lua"
+BEGIN = "-- pointer-profiles:begin"
+END = "-- pointer-profiles:end"
+
+DEFAULTS = {
+    "profiles": [
+        {
+            "id": "protoarc",
+            "label": "ProtoArc",
+            "match": "compx-2.4g-receiver-mouse",
+            "sensitivity": -0.4,
+        },
+        {
+            "id": "g305",
+            "label": "G305",
+            "match": "logitech-g305-1",
+            "sensitivity": -0.5,
+        },
+    ]
+}
+
+
+def load():
+    if not CONFIG.exists():
+        save(DEFAULTS)
+        return json.loads(json.dumps(DEFAULTS))
+    data = json.loads(CONFIG.read_text())
+    profiles = data.get("profiles") or []
+    known = {p["id"] for p in profiles}
+    for item in DEFAULTS["profiles"]:
+        if item["id"] not in known:
+            profiles.append(dict(item))
+    data["profiles"] = profiles
+    return data
+
+
+def save(data):
+    CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    CONFIG.write_text(json.dumps(data, indent=2) + "\n")
+
+
+def mice():
+    raw = subprocess.check_output(["hyprctl", "devices", "-j"], text=True)
+    names = []
+    for mouse in json.loads(raw).get("mice", []):
+        name = mouse.get("name") or ""
+        if not name or "passthrough" in name:
+            continue
+        names.append(name)
+    return names
+
+
+def live_name(profile, connected):
+    needle = profile["match"]
+    for name in connected:
+        if fnmatch.fnmatch(name, needle) or needle in name:
+            return name
+    return None
+
+
+def clamp(value):
+    number = round(float(value), 2)
+    if number < -1 or number > 1:
+        raise SystemExit("sensitivity must be between -1 and 1")
+    return number
+
+
+def apply_one(name, sensitivity):
+    code = (
+        "hl.device({ name = %s, sensitivity = %.2f, accel_profile = 'flat' })"
+        % (json.dumps(name), sensitivity)
+    )
+    subprocess.check_call(["hyprctl", "eval", code], stdout=subprocess.DEVNULL)
+
+
+def write_input(data):
+    blocks = [BEGIN]
+    for profile in data["profiles"]:
+        blocks.append("hl.device({")
+        blocks.append("  name = %s," % json.dumps(profile["match"]))
+        blocks.append("  sensitivity = %.2f," % profile["sensitivity"])
+        blocks.append('  accel_profile = "flat",')
+        blocks.append("})")
+        blocks.append("")
+    blocks.append(END)
+    body = "\n".join(blocks) + "\n"
+    text = INPUT.read_text() if INPUT.exists() else ""
+    pattern = re.compile(re.escape(BEGIN) + r".*?" + re.escape(END) + r"\n?", re.S)
+    if pattern.search(text):
+        text = pattern.sub(body, text, count=1)
+    else:
+        old = re.compile(
+            r"\n-- ProtoArc EM11 NL \(compx 2\.4G dongle\)\.\nhl\.device\(\{.*?\}\)\n",
+            re.S,
+        )
+        if old.search(text):
+            text = old.sub("\n" + body, text, count=1)
+        else:
+            text = text.rstrip() + "\n\n" + body
+    INPUT.write_text(text)
+
+
+def public(data, connected):
+    rows = []
+    for profile in data["profiles"]:
+        name = live_name(profile, connected)
+        rows.append(
+            {
+                "id": profile["id"],
+                "label": profile["label"],
+                "match": profile["match"],
+                "device": name or "",
+                "connected": name is not None,
+                "sensitivity": profile["sensitivity"],
+            }
+        )
+    active = next((row for row in rows if row["connected"]), None)
+    return {
+        "active": active["id"] if active else "",
+        "activeLabel": active["label"] if active else "Mouse",
+        "sensitivity": active["sensitivity"] if active else 0,
+        "profiles": rows,
+    }
+
+
+def main(argv):
+    command = argv[1] if len(argv) > 1 else "status"
+    data = load()
+    connected = mice()
+    if command == "status":
+        print(json.dumps(public(data, connected)))
+        return
+    if command == "apply":
+        for profile in data["profiles"]:
+            name = live_name(profile, connected)
+            if name:
+                apply_one(name, profile["sensitivity"])
+        print(json.dumps(public(data, connected)))
+        return
+    if command == "set":
+        if len(argv) != 4:
+            raise SystemExit("usage: omarchy-pointer set <id> <sensitivity>")
+        profile_id, raw = argv[2], argv[3]
+        sensitivity = clamp(raw)
+        found = None
+        for profile in data["profiles"]:
+            if profile["id"] == profile_id:
+                profile["sensitivity"] = sensitivity
+                found = profile
+                break
+        if not found:
+            raise SystemExit("unknown profile: " + profile_id)
+        save(data)
+        write_input(data)
+        name = live_name(found, connected)
+        if name:
+            apply_one(name, sensitivity)
+        print(json.dumps(public(data, connected)))
+        return
+    raise SystemExit("usage: omarchy-pointer status|apply|set <id> <sensitivity>")
+
+
+if __name__ == "__main__":
+    main(sys.argv)

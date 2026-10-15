@@ -1,0 +1,104 @@
+#!/bin/bash
+# Keep the default audio sink on whatever you last chose (Ctrl+^ / audio panel).
+# Overwatch/Wine Pulse SetDefaultEndpoint cannot steal it.
+# A change counts as yours (and becomes the new sticky output) when either
+#  - omarchy-audio-output-pick wrote audio-user-switch.ts in the last 3 s, or
+#  - Omarchy's own switcher is running right now: Ctrl+^ runs the stock
+#    omarchy-audio-output-switch, and it and the audio menus set the output
+#    via omarchy-audio-output-set-default. Games change the default through
+#    PulseAudio directly, so they never match and still get reverted.
+# The pgrep pattern is anchored on the script path, so this watcher's own
+# command line cannot match it.
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy"
+mkdir -p "$STATE_DIR"
+STICKY="$STATE_DIR/audio-sticky-sink"
+USER_TS="$STATE_DIR/audio-user-switch.ts"
+VIRT="omarchy_speaker_tuning"
+SPEAKERS_PAT="HiFi__Speaker__sink"
+
+if [[ ! -s "$STICKY" ]]; then
+  pactl get-default-sink >"$STICKY" 2>/dev/null || true
+fi
+
+stock_switch_running() {
+  pgrep -f '/omarchy-audio-output-(switch|set-default|next)( |$)' >/dev/null 2>&1
+}
+
+mark_user_switch() {
+  date +%s >"$USER_TS"
+}
+
+is_recent_user_switch() {
+  local now ts
+  now=$(date +%s)
+  ts=$(cat "$USER_TS" 2>/dev/null || echo 0)
+  [[ "$ts" =~ ^[0-9]+$ ]] || ts=0
+  (( now - ts < 3 ))
+}
+
+virt_present() {
+  pactl list short sinks 2>/dev/null | awk '{print $2}' | grep -qx "$VIRT"
+}
+
+canonical() {
+  local s=$1
+  if virt_present && [[ $s == *"$SPEAKERS_PAT"* ]]; then
+    printf '%s\n' "$VIRT"
+    return
+  fi
+  printf '%s\n' "$s"
+}
+
+move_apps_to() {
+  local target=$1 id
+  pactl list sink-inputs 2>/dev/null | awk '
+    /^Sink Input #/ {id = substr($3, 2)}
+    /application\.name = / {
+      app = $0
+      sub(/.*application\.name = "/, "", app)
+      sub(/"$/, "", app)
+      if (app != "EasyEffects") print id
+    }' | while read -r id; do
+    [[ -n $id ]] && pactl move-sink-input "$id" "$target" >/dev/null 2>&1 || true
+  done
+}
+
+enforce() {
+  local want cur mapped
+  # Check first: omarchy-audio-output-set-default finishes quickly, so look
+  # before the slower pactl calls below.
+  if stock_switch_running; then
+    mark_user_switch
+  fi
+  want=$(tr -d '\n' <"$STICKY" 2>/dev/null || true)
+  cur=$(pactl get-default-sink 2>/dev/null || true)
+  [[ -n $want && -n $cur ]] || return 0
+  want=$(canonical "$want")
+  if [[ $want != "$(tr -d '\n' <"$STICKY" 2>/dev/null || true)" ]]; then
+    printf '%s\n' "$want" >"$STICKY"
+  fi
+  if is_recent_user_switch; then
+    mapped=$(canonical "$cur")
+    printf '%s\n' "$mapped" >"$STICKY"
+    if [[ $mapped != "$cur" ]]; then
+      pactl set-default-sink "$mapped" >/dev/null 2>&1 || true
+      move_apps_to "$mapped"
+    fi
+    return 0
+  fi
+  if [[ $cur == "$want" ]]; then
+    return 0
+  fi
+  pactl set-default-sink "$want" >/dev/null 2>&1 || true
+  move_apps_to "$want"
+}
+
+enforce
+# Only server (default sink) and sink events matter. Client events must be
+# ignored: every pactl call in enforce() is itself a new client, so reacting to
+# them made the watcher trigger itself forever (~170 events/s, a full CPU core
+# and a busy pipewire-pulse, which slowed down every other pactl call).
+pactl subscribe 2>/dev/null | grep --line-buffered -E "on (server|sink) #" | while read -r _; do
+  enforce
+done
