@@ -16,8 +16,8 @@ My config is split into three repos so nothing is duplicated:
 | Repo | Used on | What it holds |
 |---|---|---|
 | [omarchy-shared-config](https://github.com/roehrbacher/omarchy-shared-config) | both | theme, top bar layout, my plugins, keybindings, menu, night light, auto timezone, audio passthrough, Insomnia (stay awake) |
-| [omarchy-pc-config](https://github.com/roehrbacher/omarchy-pc-config) | gaming PC | monitor, mouse pointer speed, headphones/speakers switching, Razer mic passthrough devices, game and streaming tweaks |
-| [omarchy-xps-config](https://github.com/roehrbacher/omarchy-xps-config) | laptop | touchpad, battery and charge limit, speaker tuning, laptop audio devices, local AI model |
+| [omarchy-pc-config](https://github.com/roehrbacher/omarchy-pc-config) | gaming PC | monitor, mouse pointer speed, headphones/speakers switching, passthrough headphones, game and streaming tweaks |
+| [omarchy-xps-config](https://github.com/roehrbacher/omarchy-xps-config) | laptop | touchpad, battery and charge limit, speaker tuning, passthrough headphones, local AI model |
 
 ```
 omarchy-shared-config   (install first)
@@ -35,7 +35,7 @@ whatever it replaces, `./install.sh --dry-run` shows what would change, and
 - **Mouse:** pointer-speed bar widget with separate speeds for two mice
 - **Audio:** sticky default output (games can't steal it), quick
   headphones/speakers switch, speaker EQ, hidden unused outputs, Bose rename
-- **Mic passthrough devices:** Razer Seiren V3 Mini into the Apple USB-C adapter
+- **Passthrough headphones:** the Apple USB-C adapter (mic = system default, the Razer Seiren V3 Mini)
 - **Gaming and streaming:** Sunshine, Overwatch and Steam window rules
 - **Dictation:** Voxtype on the Radeon GPU, held on the Context Menu key
 - **Fonts:** bar and terminal sizes for this monitor
@@ -74,8 +74,8 @@ Backups go to `~/.local/share/omarchy-config-backups/omarchy-pc-config/`;
   separate flat speed for the ProtoArc and the G305. `omarchy-pointer set`
   rewrites the mouse block in `hypr/shared-input.lua`; copy that change back to
   omarchy-shared-config if you want to keep it
-- `omarchy/audio-passthrough.machine.conf` – which mic (Razer Seiren V3 Mini) and
-  headphones (Apple USB-C adapter) Audio passthrough uses on this PC; its widget
+- `omarchy/audio-passthrough.machine.conf` – which headphones (Apple USB-C adapter)
+  Audio passthrough plays into on this PC (the mic is the system default); its widget
   is placed in the bar by `shell.d/50-pc.json`.
 - Audio: `audio-sticky-sink` (games can't steal the default output; Ctrl+^,
   the audio panel count as your choice and stick),
@@ -107,7 +107,7 @@ omasnap (`sudo pacman -R omasnap`).
 
 The service, helper and `timon.audio-passthrough` widget live in
 omarchy-shared-config. This repo only sets the devices in
-`~/.config/omarchy/audio-passthrough.machine.conf` (`SINK`, `SOURCE`). Your level
+`~/.config/omarchy/audio-passthrough.machine.conf` (`SINK`; the mic is the system default). Your level
 and on/off are in `~/.config/omarchy/audio-passthrough.conf` (set by the widget).
 
 ## License
