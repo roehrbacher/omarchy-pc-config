@@ -4,8 +4,45 @@
 > Use them at your own risk. Before installing, read the code yourself or have your
 > favorite AI review it first.
 
-Private. Gaming-PC-only settings. **Install `roehrbacher/omarchy-shared-config`
-first**, then this repo:
+## How this setup works
+
+I run [Omarchy](https://omarchy.org) on two machines:
+
+- **Gaming PC** – Ryzen 7 7700, Radeon RX 9060 XT
+- **Laptop** – Dell XPS 14
+
+My config is split into three repos so nothing is duplicated:
+
+| Repo | Used on | What it holds |
+|---|---|---|
+| [omarchy-shared-config](https://github.com/roehrbacher/omarchy-shared-config) | both | theme, top bar layout, my plugins, keybindings, menu, night light, auto timezone, audio passthrough, Insomnia (stay awake) |
+| [omarchy-pc-config](https://github.com/roehrbacher/omarchy-pc-config) | gaming PC | monitor, mouse pointer speed, headphones/speakers switching, Razer mic passthrough devices, game and streaming tweaks |
+| [omarchy-xps-config](https://github.com/roehrbacher/omarchy-xps-config) | laptop | touchpad, battery and charge limit, speaker tuning, laptop audio devices, local AI model |
+
+```
+omarchy-shared-config   (install first)
+        ├── omarchy-pc-config    (then this on the PC)
+        └── omarchy-xps-config   (or this on the laptop)
+```
+
+**Install order:** shared first, then the machine repo. Each `install.sh` backs up
+whatever it replaces, `./install.sh --dry-run` shows what would change, and
+`./uninstall.sh` restores the last backup.
+
+## What's in this repo
+
+- **Screen:** AOC 24G42E at 1080p 180 Hz, variable refresh, tearing for games
+- **Mouse:** pointer-speed bar widget with separate speeds for two mice
+- **Audio:** sticky default output (games can't steal it), quick
+  headphones/speakers switch, speaker EQ, hidden unused outputs, Bose rename
+- **Mic passthrough devices:** Razer Seiren V3 Mini into the Apple USB-C adapter
+- **Gaming and streaming:** Sunshine, Overwatch and Steam window rules
+- **Dictation:** Voxtype on the Radeon GPU, held on the Context Menu key
+- **Fonts:** bar and terminal sizes for this monitor
+
+## Install
+
+Install omarchy-shared-config first, then:
 
 ```bash
 ~/Work/omarchy-shared-config/install.sh
@@ -15,7 +52,11 @@ first**, then this repo:
 Backups go to `~/.local/share/omarchy-config-backups/omarchy-pc-config/`;
 `./uninstall.sh` restores the latest one.
 
-## What is in here
+---
+
+# Details
+
+## Everything in here
 
 - `hypr/monitors.lua` – AOC 24G42E at 1920×1080, 180 Hz, variable refresh, 1× scale
 - `hypr/machine-looknfeel.lua` – tearing allowed (only for windows that ask for
