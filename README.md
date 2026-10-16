@@ -84,9 +84,8 @@ Backups go to `~/.local/share/omarchy-config-backups/omarchy-pc-config/`;
   (`omarchy-speaker-tuning` PipeWire filter-chain + service)
 - Sunshine game streaming (enabled as a user service)
 - Voxtype on the Radeon (Vulkan, `VOXTYPE_VULKAN_DEVICE=amd`) with logging
-- `voxtype/config.toml` – Voxtype settings for this PC: large-v3-turbo q5_0 on
-  the GPU, English/German, a short vocabulary hint (Omarchy, Grok Bot, Timon
-  Röhrbacher, …) and replacements for words dictation keeps getting wrong
+- Voxtype settings (`voxtype/config.toml`) now come from omarchy-shared-config
+  (same on both machines); only the Radeon drop-ins above stay here
 - `omarchy/shell.toml` – bar font 14; terminal font size 11
 - `wireplumber/.../60-bluetooth-names.conf` – the Bose headphones' Bluetooth name
   starts with an emoji, which made Ctrl+^ and the audio panel show "(null)";
