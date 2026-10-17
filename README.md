@@ -39,6 +39,7 @@ whatever it replaces, `./install.sh --dry-run` shows what would change, and
 - **Gaming and streaming:** Sunshine, Overwatch and Steam window rules
 - **Dictation:** Voxtype on the Radeon GPU, held on the Context Menu key
 - **Fonts:** bar and terminal sizes for this monitor
+- **Brave:** UI scale 1.1 (`brave-flags.d/50-pc.conf`, merged with the shared flags and summarize extensions from omarchy-shared-config)
 
 ## Install
 
