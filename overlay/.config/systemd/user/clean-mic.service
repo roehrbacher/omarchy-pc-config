@@ -1,0 +1,15 @@
+[Unit]
+Description=Clean Mic (DeepFilterNet + noise gate filter-chain for the Razer mic)
+After=pipewire.service wireplumber.service
+Requires=pipewire.service
+PartOf=pipewire.service
+
+[Service]
+Type=simple
+Environment=LADSPA_PATH=%h/.local/lib/ladspa
+ExecStart=/usr/bin/pipewire -c clean-mic.conf
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

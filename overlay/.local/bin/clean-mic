@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Clean Mic: a "Clean Mic" input (Razer mic -> DeepFilterNet) that removes keyboard/mouse clicks.
+# Runs as its own PipeWire client (clean-mic.service), never the default input; pick it in the game.
+#   clean-mic setup    download DeepFilterNet LADSPA (official v0.5.6 release, sha256-checked) to ~/.local/lib/ladspa, enable + start
+#   clean-mic on|off   start+enable / stop+disable the service
+#   clean-mic status
+set -euo pipefail
+VER=0.5.6
+SHA=2ca3205c2911d389604a826a240e745597d50252b5cab81c8248252b335e2236
+URL="https://github.com/Rikorose/DeepFilterNet/releases/download/v$VER/libdeep_filter_ladspa-$VER-x86_64-unknown-linux-gnu.so"
+LIB="$HOME/.local/lib/ladspa/libdeep_filter_ladspa.so"
+
+case "${1:-status}" in
+  setup)
+    if ! echo "$SHA  $LIB" | sha256sum -c --status 2>/dev/null; then
+      tmp=$(mktemp); curl -fsSL "$URL" -o "$tmp"
+      echo "$SHA  $tmp" | sha256sum -c --status || { echo "checksum mismatch, aborting" >&2; rm -f "$tmp"; exit 1; }
+      install -Dm755 "$tmp" "$LIB"; rm -f "$tmp"
+    fi
+    systemctl --user daemon-reload
+    systemctl --user enable --now clean-mic.service ;;
+  on)  systemctl --user enable --now clean-mic.service ;;
+  off) systemctl --user disable --now clean-mic.service ;;
+  status) systemctl --user is-active clean-mic.service; pactl list short sources | grep -E 'clean_mic' || echo "no Clean Mic source" ;;
+  *) sed -n '2,7p' "$0"; exit 1 ;;
+esac
