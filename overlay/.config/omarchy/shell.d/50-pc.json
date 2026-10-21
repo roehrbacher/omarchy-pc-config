@@ -24,5 +24,38 @@
         "id": "jankeesvw.time-machine"
       }
     }
-  ]
+  ],
+  "barOrder": {
+    "left": [
+      "omarchy.menu",
+      "omarchy.workspaces",
+      "timon.hover-reveal"
+    ],
+    "center": [
+      "timon.indicators",
+      "timon.clock",
+      "omarchy.keyboard-layout",
+      "timon.media",
+      "omarchy.system-update"
+    ],
+    "right": [
+      "omarchy.tray",
+      "jankeesvw.time-machine",
+      "omarchy.tailscale",
+      "omarchy.agents",
+      "timon.local-ai",
+      "timon.pointer",
+      "timon.pc-power",
+      "timon.clipboard",
+      "flux",
+      "timon.grok-usage",
+      "timon.audio-passthrough",
+      "timon.audio",
+      "omarchy.bluetooth",
+      "timon.network",
+      "timon.monitor",
+      "omarchy.power",
+      "jankeesvw.notification-center"
+    ]
+  }
 }
