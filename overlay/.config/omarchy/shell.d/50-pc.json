@@ -11,6 +11,12 @@
       "entry": {
         "id": "timon.audio-passthrough"
       }
+    },
+    {
+      "after": "timon.audio-passthrough",
+      "entry": {
+        "id": "timon.pc-power"
+      }
     }
   ]
 }

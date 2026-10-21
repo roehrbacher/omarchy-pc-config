@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "timon.pc-power",
+  "name": "PC Power",
+  "version": "1.0.0",
+  "author": "Timon Röhrbacher",
+  "description": "Live system power in the bar: CPU package (Ryzen SoC PPT via the iGPU amdgpu hwmon, no root) plus dedicated GPU (amdgpu hwmon), every 1 s",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "PC Power",
+    "description": "Live CPU + GPU watts",
+    "category": "System",
+    "allowMultiple": false
+  }
+}
