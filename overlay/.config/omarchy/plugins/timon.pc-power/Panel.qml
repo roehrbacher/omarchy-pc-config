@@ -65,10 +65,14 @@ Panel {
     id: button
     anchors.fill: parent
     bar: root.bar
-    // Stock text-widget layout, copied from the vanilla weather widget:
-    // BarIconButton with the status slot, plain "<N>W", no icon.
+    // Plain "<N>W", no icon. Width = text + 21 px: the measured ink-to-ink
+    // gap between stock bar icons is 19-23 px (median 21), so the text gets
+    // the same breathing room as its neighbours. Never narrower than "00W"
+    // so the bar doesn't shift between 1- and 2-digit readings.
     text: (root.gpuW >= 0 && !vertical) ? Math.round(root.totalW) + "W" : ""
-    slotSize: Style.bar.statusSlot
+    slotSize: Math.ceil(Math.max(wattsMetrics.advanceWidth, minMetrics.advanceWidth)) + 21
+    TextMetrics { id: wattsMetrics; font.family: button.fontFamily; font.pixelSize: button.fontSize; text: button.text }
+    TextMetrics { id: minMetrics; font.family: button.fontFamily; font.pixelSize: button.fontSize; text: "00W" }
     tooltipText: (root.cpuW >= 0 ? "CPU " + Math.round(root.cpuW) + " W" : "CPU n/a") +
                  "\nGPU " + (root.gpuW >= 0 ? Math.round(root.gpuW) + " W" : "n/a")
   }
