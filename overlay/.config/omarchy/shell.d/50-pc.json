@@ -17,6 +17,12 @@
       "entry": {
         "id": "timon.pc-power"
       }
+    },
+    {
+      "after": "omarchy.tray",
+      "entry": {
+        "id": "jankeesvw.time-machine"
+      }
     }
   ]
 }
