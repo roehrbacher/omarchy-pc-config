@@ -4,6 +4,8 @@
 #   clean-mic setup    download DeepFilterNet LADSPA (official v0.5.6 release, sha256-checked) to ~/.local/lib/ladspa, enable + start
 #   clean-mic on|off   start+enable / stop+disable the service
 #   clean-mic status
+#   clean-mic restart-audio   restart pipewire -> wireplumber -> filter-chains in order,
+#                             only when unlocked, idle, not gaming and nothing playing
 set -euo pipefail
 VER=0.5.6
 SHA=2ca3205c2911d389604a826a240e745597d50252b5cab81c8248252b335e2236
@@ -22,5 +24,11 @@ case "${1:-status}" in
   on)  systemctl --user enable --now clean-mic.service ;;
   off) systemctl --user disable --now clean-mic.service ;;
   status) systemctl --user is-active clean-mic.service; pactl list short sources | grep -E 'clean_mic' || echo "no Clean Mic source" ;;
-  *) sed -n '2,7p' "$0"; exit 1 ;;
+  restart-audio)
+    omarchy-safe-gate --no-media || { echo "not safe to restart audio now" >&2; exit 75; }
+    systemctl --user restart pipewire.service; sleep 2
+    systemctl --user restart wireplumber.service pipewire-pulse.service; sleep 2
+    systemctl --user restart omarchy-speaker-tuning.service
+    if systemctl --user is-enabled -q clean-mic.service; then systemctl --user restart clean-mic.service; fi ;;
+  *) sed -n '2,9p' "$0"; exit 1 ;;
 esac
