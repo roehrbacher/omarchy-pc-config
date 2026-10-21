@@ -63,8 +63,13 @@ Panel {
 
   BarIconButton {
     id: button
+    anchors.fill: parent
     bar: root.bar
-    text: root.gpuW < 0 ? "󱐋" : "󱐋 " + Math.round(root.totalW) + "W"
+    // Same layout as the laptop's xps-power watts: "<N>W <icon>" in a fixed
+    // slot of whole icon slots (one per ~"NNW " group), stock bar font.
+    readonly property bool showWatts: root.gpuW >= 0 && !vertical
+    text: showWatts ? Math.round(root.totalW) + "W " + "󱐋" : "󱐋"
+    slotSize: Style.bar.iconSlot * (showWatts ? 2 : 1)
     tooltipText: (root.cpuW >= 0 ? "CPU " + Math.round(root.cpuW) + " W" : "CPU n/a") +
                  "\nGPU " + (root.gpuW >= 0 ? Math.round(root.gpuW) + " W" : "n/a")
   }
