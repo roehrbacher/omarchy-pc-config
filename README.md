@@ -68,7 +68,7 @@ Backups go to `~/.local/share/omarchy-config-backups/omarchy-pc-config/`;
   (F9 and Super+Ctrl+X unbound)
 - `hypr/machine-windows.lua` – Steam library and Bitwarden open tiled;
   Overwatch: full opacity, tearing, no idle while fullscreen
-- `omarchy/shell.d/50-pc.json` – adds the pointer-speed toggle after Grokbar
+- (bar widgets such as the pointer-speed toggle are placed by hand in the live bar; the repo does not manage the bar)
   (the `timon.audio` panel itself now lives in omarchy-shared-config; on this PC
   it picks outputs through `omarchy-audio-output-pick` so the choice sticks)
 - `omarchy/plugins/timon.pointer` + `omarchy/pointer.json` + `omarchy-pointer` –
@@ -77,7 +77,7 @@ Backups go to `~/.local/share/omarchy-config-backups/omarchy-pc-config/`;
   omarchy-shared-config if you want to keep it
 - `omarchy/audio-passthrough.machine.conf` – which headphones (Apple USB-C adapter)
   Audio passthrough plays into on this PC (the mic is the system default); its widget
-  is placed in the bar by `shell.d/50-pc.json`.
+  is placed in the bar by hand (the repo does not manage the bar).
 - Audio: `audio-sticky-sink` (games can't steal the default output; Ctrl+^,
   the audio panel count as your choice and stick),
   `omarchy-audio-output-pick` / `-switch-two`,
