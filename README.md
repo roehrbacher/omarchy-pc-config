@@ -105,10 +105,10 @@ omasnap (`sudo pacman -R omasnap`).
 
 ## Audio passthrough
 
-The service, helper and `timon.audio-passthrough` widget live in
+The service, helper and the Mic pass-through section of the audio popup live in
 omarchy-shared-config. This repo only sets the devices in
 `~/.config/omarchy/audio-passthrough.machine.conf` (`SINK`; the mic is the system default). Your level
-and on/off are in `~/.config/omarchy/audio-passthrough.conf` (set by the widget).
+and on/off are in `~/.config/omarchy/audio-passthrough.conf` (set in the audio popup).
 
 ## Packages
 
