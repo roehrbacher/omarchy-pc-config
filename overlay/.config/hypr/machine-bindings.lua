@@ -50,11 +50,8 @@ o.bind("SUPER + W", "Close window", function()
   hl.dispatch(hl.dsp.window.close())
 end)
 
--- Voxtype: hold Right Super to talk, release to type.
+-- Voxtype: Super+D toggles dictation (start/stop). No push-to-talk.
 -- Unbind Omarchy defaults (F9 hold, Super+Ctrl+X toggle).
 hl.unbind("F9")
 hl.unbind("SUPER + CTRL + X")
--- Right Super is code:134 (Super_R).
-o.bind("code:134", "Start dictation (push-to-talk)", "voxtype record start", { repeating = false })
-o.bind("code:134", "Stop dictation (push-to-talk)", "voxtype record stop", { release = true })
-o.bind("SUPER + code:134", "Stop dictation (push-to-talk)", "voxtype record stop", { release = true })
+o.bind("SUPER + D", "Toggle dictation", "voxtype record toggle")
