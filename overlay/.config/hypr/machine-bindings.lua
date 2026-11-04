@@ -50,14 +50,4 @@ o.bind("SUPER + W", "Close window", function()
   hl.dispatch(hl.dsp.window.close())
 end)
 
--- Voxtype: hold Super+D to talk, release to paste (push-to-talk).
--- Unbind Omarchy defaults (F9 hold, Super+Ctrl+X toggle).
-hl.unbind("F9")
-hl.unbind("SUPER + CTRL + X")
-o.bind("SUPER + D", "Start dictation (push-to-talk)", "voxtype record start", { repeating = false })
-o.bind("SUPER + D", "Stop dictation (push-to-talk)", "voxtype record stop", { release = true })
--- If Super is let go before D, the D release no longer matches SUPER + D, so
--- also stop on the Super release. Hyprland may report that release with or
--- without SUPER still set, so bind both (a stop while idle does nothing).
-o.bind("SUPER + Super_L", "Stop dictation (push-to-talk)", "voxtype record stop", { release = true, non_consuming = true })
-o.bind("Super_L", "Stop dictation (push-to-talk)", "voxtype record stop", { release = true, non_consuming = true })
+-- Voxtype push-to-talk (Shift + Left Alt) lives in shared-bindings.lua.

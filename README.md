@@ -37,7 +37,7 @@ whatever it replaces, `./install.sh --dry-run` shows what would change, and
   headphones/speakers switch, speaker EQ, hidden unused outputs, Bose rename
 - **Passthrough headphones:** the Apple USB-C adapter (mic = system default, the Razer Seiren V3 Mini)
 - **Gaming and streaming:** Sunshine, Overwatch and Steam window rules
-- **Dictation:** Voxtype on the Radeon GPU, held on the Context Menu key
+- **Dictation:** Voxtype on the Radeon GPU, held on Shift+Left Alt
 - **Fonts:** bar and terminal sizes for this monitor
 - **Brave:** UI scale 1.1 (`brave-flags.d/50-pc.conf`, merged with the shared flags and summarize extensions from omarchy-shared-config)
 
@@ -64,7 +64,7 @@ Backups go to `~/.local/share/omarchy-config-backups/omarchy-pc-config/`;
   it), variable refresh for fullscreen games/video
 - `hypr/machine-bindings.lua` – Super+F covers the screen but keeps apps
   windowed (games and video still get real fullscreen); Super+W kills Ente
-  Photos properly; hold either Context Menu key to dictate with Voxtype
+  Photos properly; hold Shift+Left Alt to dictate with Voxtype
   (F9 and Super+Ctrl+X unbound)
 - `hypr/machine-windows.lua` – Steam library and Bitwarden open tiled;
   Overwatch: full opacity, tearing, no idle while fullscreen
