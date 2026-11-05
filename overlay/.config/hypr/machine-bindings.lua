@@ -50,4 +50,4 @@ o.bind("SUPER + W", "Close window", function()
   hl.dispatch(hl.dsp.window.close())
 end)
 
--- Dictation keys (Alt+Space hold, Super+Ctrl+X) live in shared-bindings.lua.
+-- Dictation key (Super+D hold) lives in shared-bindings.lua.
