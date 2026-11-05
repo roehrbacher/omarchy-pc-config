@@ -4,7 +4,7 @@
       "id": "protoarc",
       "label": "ProtoArc",
       "match": "compx-2.4g-receiver-mouse",
-      "sensitivity": -0.4
+      "sensitivity": -0.45
     },
     {
       "id": "g305",
