@@ -14,10 +14,20 @@ import sys
 from pathlib import Path
 
 CONFIG = Path.home() / ".config/omarchy/pointer.json"
-# The mouse blocks live in the shared input file (omarchy-shared-config).
-INPUT = Path.home() / ".config/hypr/shared-input.lua"
+# Tuned speeds live in the machine-local input file (omarchy-pc-config),
+# loaded AFTER shared-input.lua. Shared keeps install defaults; sync must
+# never overwrite a tuned PC feel.
+INPUT = Path.home() / ".config/hypr/machine-input.lua"
 BEGIN = "-- pointer-profiles:begin"
 END = "-- pointer-profiles:end"
+MACHINE_INPUT_HEADER = """-- Managed by omarchy-pc-config. PC-only input overrides.
+-- Loaded AFTER hypr/shared-input.lua (see hypr/input.lua).
+--
+-- Pointer speeds live here (not in shared-input.lua) so shared-config sync
+-- keeps the install defaults and never overwrites a tuned PC feel.
+-- `omarchy-pointer set` rewrites the pointer-profiles block below.
+
+"""
 
 DEFAULTS = {
     "profiles": [
@@ -101,19 +111,16 @@ def write_input(data):
         blocks.append("")
     blocks.append(END)
     body = "\n".join(blocks) + "\n"
-    text = INPUT.read_text() if INPUT.exists() else ""
+    if INPUT.exists():
+        text = INPUT.read_text()
+    else:
+        text = MACHINE_INPUT_HEADER
     pattern = re.compile(re.escape(BEGIN) + r".*?" + re.escape(END) + r"\n?", re.S)
     if pattern.search(text):
         text = pattern.sub(body, text, count=1)
     else:
-        old = re.compile(
-            r"\n-- ProtoArc EM11 NL \(compx 2\.4G dongle\)\.\nhl\.device\(\{.*?\}\)\n",
-            re.S,
-        )
-        if old.search(text):
-            text = old.sub("\n" + body, text, count=1)
-        else:
-            text = text.rstrip() + "\n\n" + body
+        text = text.rstrip() + "\n\n" + body
+    INPUT.parent.mkdir(parents=True, exist_ok=True)
     INPUT.write_text(text)
 
 

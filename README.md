@@ -72,8 +72,10 @@ Backups go to `~/.local/share/omarchy-config-backups/omarchy-pc-config/`;
   (the `timon.audio` panel itself now lives in omarchy-shared-config; on this PC
   it picks outputs through `omarchy-audio-output-pick` so the choice sticks)
 - `omarchy/plugins/timon.pointer` + `omarchy/pointer.json` + `omarchy-pointer` –
-  separate flat speed for the ProtoArc and the G305. `omarchy-pointer set`
-  rewrites the mouse block in `hypr/shared-input.lua`; copy that change back to
+  separate flat speed for the ProtoArc and the G305. Tuned values live in
+  `hypr/machine-input.lua` (this repo). `omarchy-pointer set` rewrites that
+  machine-local block only — never `hypr/shared-input.lua` — so shared-config
+  sync keeps install defaults and cannot overwrite PC feel.
   omarchy-shared-config if you want to keep it
 - `omarchy/audio-passthrough.machine.conf` – which headphones (Apple USB-C adapter)
   Audio passthrough plays into on this PC (the mic is the system default); its widget
